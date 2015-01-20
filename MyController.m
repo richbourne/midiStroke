@@ -110,11 +110,14 @@
 - (void) midiConvert: (MIDIPacket *)packet endpoint:(MIDIPortRef *)ep {	
 	int i, j;
 	BOOL cc = false;
+    BOOL on = false;
 	int pcktStart = packet->data[0];
 	int channel = (pcktStart &= 15) + 1;
 	
 	int packetStart = packet->data[0];		// remembers original type and channel of message before altering
 	if ((packetStart>>4) == 0x0b) { cc = true; }
+    if ((packetStart>>4) == 0x09) { on = true; }	// noteOn
+    if ((packetStart>>4) == 0x08) { on = false; }	// noteOff
 	
 	//printf("the channel is: %i \n", channel);
 	//printf("the note is: %i \n", packet->data[1]);
@@ -144,9 +147,11 @@
 						if ([[eprop objectForKey: @"control"] intValue] == 1) {
 							CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)59, true ); // control > down
 						}
-						
-						CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)theLetter, true); 
-						CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)theLetter, false);
+
+                        
+						CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)theLetter, on);
+                        //usleep(50000);
+						//CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)theLetter, false);
 						
 						if ([[eprop objectForKey: @"apple"] intValue] == 1) {
 							CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, false ); // command > up

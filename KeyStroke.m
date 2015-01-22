@@ -22,14 +22,23 @@ static void readProc(const MIDIPacketList *pktlist, void *refCon, void *connRefC
 	
 	int packetStart = packet->data[0];
 	
-	if ((packetStart>>4) == 0x09) { type = @"nOn"; }	// noteOn
+	if ((packetStart>>4) == 0x09)
+    {
+        if (packet->data[2] != 0)
+            type = @"nOn";
+        else
+            type = @"nOff";
+    }
 	if ((packetStart>>4) == 0x08) { type = @"nOff"; }	// noteOff
 	if ((packetStart>>4) == 0x0b) { type = @"cc"; }		// cc
 	if ((packetStart>>4) == 0x0e) { type = @"pb"; }		// pitchbend
 	if ((packetStart) == 0xfe)    { type = @"as"; }		// activeSensing
 	if ((packetStart>>4) == 0x0c) { type = @"pgm"; }	// program change
-		
-    if (([type isEqualToString:@"nOn"] && packet->data[2] != 0) || ([type isEqualToString:@"nOff"] && packet->data[2] != 0) || [type isEqualToString:@"cc"] || [type isEqualToString:@"pgm"]) {
+	
+    int note = packet->data[1];
+    int velocity = packet->data[2];
+    
+    if ((type == @"nOn") || (type == @"nOff") || type == @"cc" || type == @"pgm") {
 		[convert midiConvert:(MIDIPacket *)packet endpoint:(MIDIPortRef *)connRefCon];
 	}
 	
@@ -86,6 +95,8 @@ static void readProc(const MIDIPacketList *pktlist, void *refCon, void *connRefC
         MIDIEndpointRef source;
 		
         source = (MIDIEndpointRef)CFArrayGetValueAtIndex(sourceArray, i);
+        if (source == 0)
+            continue;
 		
 		NSMutableString *mNum = [NSMutableString string];
 

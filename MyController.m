@@ -116,7 +116,13 @@
 	
 	int packetStart = packet->data[0];		// remembers original type and channel of message before altering
 	if ((packetStart>>4) == 0x0b) { cc = true; }
-    if ((packetStart>>4) == 0x09) { on = true; }	// noteOn
+    if ((packetStart>>4) == 0x09)
+    {
+        if (packet->data[2] != 0)
+            on = true;
+        else
+            on = false;
+    }
     if ((packetStart>>4) == 0x08) { on = false; }	// noteOff
 	
 	//printf("the channel is: %i \n", channel);
@@ -147,7 +153,6 @@
 						if ([[eprop objectForKey: @"control"] intValue] == 1) {
 							CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)59, true ); // control > down
 						}
-
                         
 						CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)theLetter, on);
                         //usleep(50000);
